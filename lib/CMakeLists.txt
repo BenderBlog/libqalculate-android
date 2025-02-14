@@ -141,7 +141,7 @@ set(QALCULATE_LIBXML_LIBS "-L${XML2_INSTALL_DIR}/lib -lxml2")
 ExternalProject_Add(qalculate
         URL https://github.com/Qalculate/libqalculate/releases/download/v5.5.0/libqalculate-5.5.0.tar.gz
         URL_HASH MD5=eeebd743379bf3b31c01f65d11021712
-        PATCH_COMMAND patch <SOURCE_DIR>/libqalculate/util.cc < ${CMAKE_CURRENT_LIST_DIR}/src/main/cpp/liqalculate_util.patch
+        PATCH_COMMAND patch -Np1 < ${CMAKE_CURRENT_LIST_DIR}/src/main/cpp/0001_fix_libqalculate_util.patch && patch -Np1 < ${CMAKE_CURRENT_LIST_DIR}/src/main/cpp/0002_date_to_calendar_android.patch
         CONFIGURE_COMMAND ${CROSS_COMPILE_PREFIX} <SOURCE_DIR>/configure --prefix=<INSTALL_DIR> --host ${ANDROID_LLVM_TRIPLE} --without-icu --without-libcurl --without-libintl-prefix --enable-compiled-definitions CPPFLAGS=${QALCULATE_CPPFLAGS} LDFLAGS=${QALCULATE_LDFLAGS} LIBXML_CFLAGS=${QALCULATE_LIBXML_CFLAGS} LIBXML_LIBS=${QALCULATE_LIBXML_LIBS}
         BUILD_COMMAND make -j16
         INSTALL_COMMAND make install

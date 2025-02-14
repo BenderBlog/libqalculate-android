@@ -38,3 +38,4 @@ namespace std {
 %include <libqalculate/Function.h>
 %include <libqalculate/Prefix.h>
 %include <libqalculate/Unit.h>
+%include <libqalculate/QalculateDateTime.h>

@@ -1,0 +1,115 @@
+diff --git a/libqalculate/QalculateDateTime.cc b/libqalculate/QalculateDateTime.cc
+index 73c5284..0e1c71e 100644
+--- a/libqalculate/QalculateDateTime.cc
++++ b/libqalculate/QalculateDateTime.cc
+@@ -18,6 +18,7 @@
+ #include "support.h"
+ #include "util.h"
+ #include "Calculator.h"
++#include <libqalculate/includes.h>
+ #include <limits.h>
+ #include <stdlib.h>
+ #ifndef _MSC_VER
+@@ -2740,6 +2741,50 @@ QalculateDateTime findNextLunarPhase(const QalculateDateTime &date, Number phase
+ 	return dt;
+ }
+ 
++ReturnedDate dateToCalendarToAndroid(
++	const QalculateDateTime &date,
++	long int y,
++	long int m,
++	long int d,
++	CalendarSystem ct
++) {
++	if(ct == CALENDAR_GREGORIAN) {
++		return ReturnedDate(true, date.year(), date.month(),date.day());
++	}
++	CALCULATOR->beginTemporaryStopIntervalArithmetic();
++	if(!fixed_to_date(date_to_fixed(date.year(), date.month(), date.day(), CALENDAR_GREGORIAN), y, m, d, ct)) {
++		CALCULATOR->endTemporaryStopIntervalArithmetic();
++		return ReturnedDate(false, 1, 1, 1);
++	}
++	CALCULATOR->endTemporaryStopIntervalArithmetic();
++	return ReturnedDate(true, y, m, d);
++}
++
++ReturnedChineseYearInfo chineseYearInfoToAndroid(
++	long int year
++) {
++	long int cycle;
++	long int year_in_cycle;
++	long int stem;
++	long int branch;
++
++	chineseYearInfo(
++		year,
++		cycle,
++		year_in_cycle,
++		stem,
++		branch
++	);
++
++	return ReturnedChineseYearInfo(
++		cycle,
++		year_in_cycle,
++		stem,
++		branch
++	);
++}
++
++
+ #ifdef _MSC_VER
+ #	define DELTA_EPOCH_IN_MICROSECS  11644473600000000Ui64
+ 
+diff --git a/libqalculate/QalculateDateTime.h b/libqalculate/QalculateDateTime.h
+index a77abc4..5b0a342 100644
+--- a/libqalculate/QalculateDateTime.h
++++ b/libqalculate/QalculateDateTime.h
+@@ -88,6 +88,32 @@ typedef enum {
+ 	CALENDAR_CHINESE
+ } CalendarSystem;
+ 
++struct ReturnedDate {
++	bool isSuccess;
++	long year;
++	long month;
++	long day;
++
++	ReturnedDate(bool isSuccess, long year, long month, long day) :
++		isSuccess(isSuccess),
++		year(year),
++		month(month),
++		day(day) {}
++};
++
++struct ReturnedChineseYearInfo {
++	long int cycle;
++	long int year_in_cycle;
++	long int stem;
++	long int branch;
++
++	ReturnedChineseYearInfo(long int cycle, long int year_in_cycle, long int stem, long int branch) :
++		cycle(cycle),
++		year_in_cycle(year_in_cycle),
++		stem(stem),
++		branch(branch) {}
++};
++
+ #define NUMBER_OF_CALENDARS 11
+ 
+ #define VERNAL_EQUINOX 0
+@@ -109,6 +135,14 @@ long int chineseCycleYearToYear(long int cycle, long int year_in_cycle);
+ int chineseStemBranchToCycleYear(long int stem, long int branch);
+ std::string chineseStemName(long int stem);
+ std::string chineseBranchName(long int branch);
++ReturnedDate dateToCalendarToAndroid(
++	const QalculateDateTime &date,
++	long int y,
++	long int m,
++	long int d,
++	CalendarSystem ct
++);
++ReturnedChineseYearInfo chineseYearInfoToAndroid(long int year);
+ 
+ #ifdef _MSC_VER
+ int gettimeofday(struct timeval* tv, struct timezone* tz);
